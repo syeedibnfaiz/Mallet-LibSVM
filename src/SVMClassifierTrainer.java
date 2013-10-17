@@ -1,3 +1,4 @@
+package ca.uwo.csd.ai.nlp.mallet.libsvm;
 
 import cc.mallet.classify.ClassifierTrainer;
 import cc.mallet.types.FeatureVector;
@@ -20,31 +21,32 @@ import ca.uwo.csd.ai.nlp.libsvm.svm_parameter;
  * @author Syeed Ibn Faiz
  */
 public class SVMClassifierTrainer extends ClassifierTrainer<SVMClassifier> {
+
     private SVMClassifier classifier;
-    private Map<Label, Double> mLabel2sLabel;
+    private Map<String, Double> mLabel2sLabel;
     private CustomKernel kernel;
     private int numClasses;
     private boolean predictProbability;
     private svm_parameter param;
-    
+
     public SVMClassifierTrainer(CustomKernel kernel) {
-        this(kernel, false);        
-    }    
-    
+        this(kernel, false);
+    }
+
     public SVMClassifierTrainer(CustomKernel kernel, boolean predictProbability) {
         super();
-        mLabel2sLabel = new HashMap<Label, Double>();
+        mLabel2sLabel = new HashMap<String, Double>();
         this.kernel = kernel;
         this.predictProbability = predictProbability;
         init();
-    }    
-    
-    private void init() {        
+    }
+
+    private void init() {
         param = new svm_parameter();
         if (predictProbability) {
             param.probability = 1;
         }
-    }        
+    }
 
     public svm_parameter getParam() {
         return param;
@@ -61,8 +63,7 @@ public class SVMClassifierTrainer extends ClassifierTrainer<SVMClassifier> {
     public void setKernel(CustomKernel kernel) {
         this.kernel = kernel;
     }
-    
-    
+
     @Override
     public SVMClassifier getClassifier() {
         return classifier;
@@ -70,37 +71,37 @@ public class SVMClassifierTrainer extends ClassifierTrainer<SVMClassifier> {
 
     @Override
     public SVMClassifier train(InstanceList trainingSet) {
-        cleanUp();        
+        cleanUp();
         KernelManager.setCustomKernel(kernel);
         svm_model model = SVMTrainer.train(getSVMInstances(trainingSet), param);
         classifier = new SVMClassifier(model, mLabel2sLabel, trainingSet.getPipe(), predictProbability);
         return classifier;
     }
-    
+
     private void cleanUp() {
         mLabel2sLabel.clear();
         numClasses = 0;
     }
-    
+
     private List<ca.uwo.csd.ai.nlp.libsvm.ex.Instance> getSVMInstances(InstanceList instanceList) {
         List<ca.uwo.csd.ai.nlp.libsvm.ex.Instance> list = new ArrayList<ca.uwo.csd.ai.nlp.libsvm.ex.Instance>();
         for (Instance instance : instanceList) {
             SparseVector vector = getVector(instance);
-            list.add(new ca.uwo.csd.ai.nlp.libsvm.ex.Instance(getLabel((Label) instance.getTarget()), vector));            
+            list.add(new ca.uwo.csd.ai.nlp.libsvm.ex.Instance(getLabel((Label) instance.getTarget()), vector));
         }
         return list;
     }
-    
+
     private double getLabel(Label target) {
-        Double label = mLabel2sLabel.get(target);
-        if (label == null) {         
+        Double label = mLabel2sLabel.get(target.toString());
+        if (label == null) {
             numClasses++;
-            label = 1.0 * numClasses;            
-            mLabel2sLabel.put(target, label);
+            label = 1.0 * numClasses;
+            mLabel2sLabel.put(target.toString(), label);
         }
         return label;
     }
-    
+
     static SparseVector getVector(Instance instance) {
         FeatureVector fv = (FeatureVector) instance.getData();
         int[] indices = fv.getIndices();
