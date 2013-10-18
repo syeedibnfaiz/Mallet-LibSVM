@@ -42,5 +42,6 @@ public class Main {
         ClassifierTrainer trainer = new SVMClassifierTrainer(new LinearKernel());
         Classifier classifier = trainer.train(trainingInstanceList);
         System.out.println("Accuracy: " + classifier.getAccuracy(testingInstanceList));
+
     }
 }

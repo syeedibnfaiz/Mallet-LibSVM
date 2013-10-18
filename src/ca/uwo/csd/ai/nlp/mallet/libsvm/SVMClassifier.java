@@ -7,6 +7,8 @@ import cc.mallet.types.Instance;
 import cc.mallet.types.LabelAlphabet;
 import cc.mallet.types.LabelVector;
 import ca.uwo.csd.ai.nlp.common.SparseVector;
+import ca.uwo.csd.ai.nlp.kernel.CustomKernel;
+import ca.uwo.csd.ai.nlp.kernel.KernelManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,10 +27,12 @@ public class SVMClassifier extends Classifier implements Serializable {
     private Map<Double, String> svmLabel2mltLabel;       //mapping from SVM label to Mallet Label
     private int[] svmIndex2mltIndex;                    //mapping from SVM Label indices (svm.label) to Mallet Label indices (targetLabelAlphabet)
     private boolean predictProbability;                 //whether probability is predicted by SVM
-
-    public SVMClassifier(svm_model model, Map<String, Double> mLabel2sLabel, Pipe instancePipe, boolean predictProbability) {
+    private CustomKernel kernel;                        //custom kernel used to train the model
+    
+    public SVMClassifier(svm_model model, CustomKernel kernel, Map<String, Double> mLabel2sLabel, Pipe instancePipe, boolean predictProbability) {
         super(instancePipe);
         this.model = model;
+        this.kernel = kernel;
         this.mltLabel2svmLabel = mLabel2sLabel;
         this.predictProbability = predictProbability;
         init();
@@ -53,6 +57,8 @@ public class SVMClassifier extends Classifier implements Serializable {
 
     @Override
     public Classification classify(Instance instance) {
+        //TODO: find a better approach
+        KernelManager.setCustomKernel(this.kernel);
         SparseVector vector = SVMClassifierTrainer.getVector(instance);
         double[] scores = new double[model.nr_class];
 

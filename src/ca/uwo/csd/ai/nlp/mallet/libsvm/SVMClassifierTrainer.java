@@ -74,7 +74,7 @@ public class SVMClassifierTrainer extends ClassifierTrainer<SVMClassifier> {
         cleanUp();
         KernelManager.setCustomKernel(kernel);
         svm_model model = SVMTrainer.train(getSVMInstances(trainingSet), param);
-        classifier = new SVMClassifier(model, mLabel2sLabel, trainingSet.getPipe(), predictProbability);
+        classifier = new SVMClassifier(model, kernel, mLabel2sLabel, trainingSet.getPipe(), predictProbability);
         return classifier;
     }
 
